@@ -25,14 +25,8 @@ class PersonProfileCubit extends Cubit<PersonProfileStates>{
 
     try {
       final response = await personProfileUseCase.execute(personId);
-      print('API Response: ${response.data}'); // Debug print
       final data = PersonProfileModel.fromJson(response.data);
       emit(SuccessPersonProfileStates(data.profiles ?? []));
-
-      // Check if profiles are empty
-      if (data.profiles?.isEmpty ?? true) {
-        print("Profiles list is empty.");
-      }
 
     } catch (e) {
       emit(ErrorPersonProfileStates(e.toString()));
