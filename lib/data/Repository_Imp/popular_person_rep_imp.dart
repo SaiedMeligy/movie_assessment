@@ -15,12 +15,13 @@ class PopularPersonRepositoryImp implements PopularPersonRepository {
       if (response.statusCode == 200) {
         return response;
       } else {
-        throw ServerFailure(
+        throw
+        ServerFailure(
           statusCode: response.statusCode.toString(),
           message: response.data["status_message"] ?? "Unknown Error",
         );
       }
-    } on DioError catch (dioError) {
+    } on DioException catch (dioError) {
       throw ServerFailure(
         statusCode: dioError.response?.statusCode.toString() ?? "",
         message: dioError.response?.data["status_message"] ?? "",

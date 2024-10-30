@@ -9,6 +9,7 @@ import 'package:movie_assessment/features/PopularPerson/manager/states.dart';
 import 'package:movie_assessment/domain/models/PopularPersonModel.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../../../core/Failure/server_failure.dart';
 import '../../../core/Services/database_halper.dart';
 
 class PopularPersonCubit extends Cubit<PopularPersonStates> {
@@ -63,7 +64,11 @@ class PopularPersonCubit extends Cubit<PopularPersonStates> {
 
       emit(SuccessPopularPersonState(persons));
     } catch (error) {
-      emit(ErrorPopularPersonState(error.toString()));
+      if (error is ServerFailure) {
+        emit(ErrorPopularPersonState(error.message ?? "no data available"));
+      } else {
+        emit(ErrorPopularPersonState("Unknown error "));
+      }
     } finally {
       isLoading = false;
     }
