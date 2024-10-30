@@ -7,6 +7,9 @@ import 'package:movie_assessment/domain/Repository/PopularPersonRepository/popul
 import 'package:movie_assessment/domain/useCase/PopularPerson/popular_person_use_case.dart';
 import 'package:movie_assessment/features/PopularPerson/manager/states.dart';
 import 'package:movie_assessment/domain/models/PopularPersonModel.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+import '../../../core/Services/database_halper.dart';
 
 class PopularPersonCubit extends Cubit<PopularPersonStates> {
   int currentPage = 1;
@@ -19,10 +22,23 @@ class PopularPersonCubit extends Cubit<PopularPersonStates> {
   late PopularPersonUseCase personUseCase;
   late PopularPersonRepository personRepository;
   late PopularPersonDataSource personDataSource;
+  final DatabaseHelper databaseHelper = DatabaseHelper.instance;
 
-  void fetchPopularPerson({bool loadMore = false}) async {
+
+  Future<void> fetchPopularPerson({bool loadMore = false}) async {
     if (isLoading || isLastPage) return;
-
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      final cachedPersons = await databaseHelper.fetchPersons();
+      if (cachedPersons.isNotEmpty) {
+        persons = cachedPersons;
+        emit(SuccessPopularPersonState(persons));
+        return;
+      } else {
+        emit(ErrorPopularPersonState("No data available."));
+        return;
+      }
+    }
     if (!loadMore) {
       emit(LoadingPopularPersonStates());
     }
@@ -32,6 +48,7 @@ class PopularPersonCubit extends Cubit<PopularPersonStates> {
     personDataSource = PopularPersonDataSourceImp(dio);
     personRepository = PopularPersonRepositoryImp(personDataSource);
     personUseCase = PopularPersonUseCase(personRepository);
+
 
     try {
       final response = await personUseCase.execute(page: currentPage);

@@ -18,6 +18,7 @@ class PersonProfileCubit extends Cubit<PersonProfileStates>{
 
 
   void fetchPersonProfile(int personId) async {
+
     Dio dio = Dio();
     personProfileDataSource = PersonProfileDataSourceImp(dio);
     personProfileRepository = PersonProfileRepositoryImp(personProfileDataSource);
